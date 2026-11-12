@@ -1,0 +1,58 @@
+name: CI
+
+on:
+    push:
+    pull_request:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    checks:
+        runs-on: windows-latest
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+
+            - name: Install Deno and just
+              run: npm install --global deno@2.5.0 rust-just
+
+            - name: Lint, type-check, format, test, and update lockfile
+              run: just lint check fmt test lock
+
+    release:
+        needs: checks
+        runs-on: windows-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                format: [exe, zip]
+                platform: [windows, linux]
+        name: Release ${{ matrix.format }} (${{ matrix.platform }})
+        steps:
+            - name: Check out repository
+              uses: actions/checkout@v4
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+
+            - name: Install Deno and just
+              run: npm install --global deno@2.5.0 rust-just
+
+            - name: Build release
+              run: just release ${{ matrix.format }} ${{ matrix.platform }}
+
+            - name: Upload install folder
+              uses: actions/upload-artifact@v4
+              with:
+                  name: install-${{ matrix.format }}-${{ matrix.platform }}
+                  path: install/
+                  if-no-files-found: error

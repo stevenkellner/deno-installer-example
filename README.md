@@ -2,40 +2,24 @@
 
 ## Prerequisites
 
-These commands are written for Windows PowerShell. Install Deno and the `just`
-command runner:
+Make sure you have Node.js installed on your system before proceeding. You can
+download it from the official website: https://nodejs.org/. Verify the
+installation by running the following command in your terminal:
 
 ```powershell
-irm https://deno.land/install.ps1 | iex
-winget install --id Casey.Just --exact
+node --version
 ```
 
-The `justfile` is already included in this repository; you do not need to
-download it separately. Open a new PowerShell window after installing, then
-check that both commands are available:
+Install Deno and the `just` command runner:
+
+```powershell
+npm install -g deno@2.5.0 rust-just
+```
+
+After installing, open a new terminal window to verify that both Deno and `just`
+are correctly installed by running the following commands:
 
 ```powershell
 deno --version
 just --version
 ```
-
-## Run
-
-From the repository directory, run the demo directly with Deno:
-
-```powershell
-deno run --allow-all src/install.ts
-```
-
-Or run `just` to list the available project commands. For example, `just verify`
-runs formatting, linting, type checking, tests, and updates the lockfile.
-
-To download and extract the pinned Deno 2.5.0 Windows runtime used by the
-portable build, run:
-
-```powershell
-just extract-runtime
-```
-
-The runtime is downloaded to `downloads/` and extracted under
-`downloads/runtime/`.

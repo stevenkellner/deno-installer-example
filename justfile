@@ -7,20 +7,24 @@ DENO_RUNTIME_VERSION := "2.5.0"
 @default:
     just --list
 
-@fmt:
+[private]
+@check-runtime:
+    $versionOutput = @(deno --version); if (-not $?) { exit 1 }; $runtimeVersion = ($versionOutput[0] -split '\s+')[1]; if ($runtimeVersion -ne '{{DENO_RUNTIME_VERSION}}') { Write-Warning "Local Deno $runtimeVersion does not match portable Deno {{DENO_RUNTIME_VERSION}}. To align versions, run: deno upgrade --version {{DENO_RUNTIME_VERSION}}" }
+
+@fmt: check-runtime
     deno fmt
 
-@lint:
+@lint: check-runtime
     deno lint
 
-@check:
+@check: check-runtime
     deno check src tests
 
-@test:
+@test: check-runtime
     deno test
 
 [private]
-@lock:
+@lock: check-runtime
     deno cache --lock=deno.lock src/install.ts
 
 verify:
@@ -37,7 +41,7 @@ verify:
     if (Test-Path install) { Remove-Item install -Recurse -Force }
 
 [private]
-@compile: clean
+@compile: check-runtime clean
     New-Item -ItemType Directory install -Force | Out-Null
     deno compile --allow-all --output install/installer.exe src/install.ts
 
@@ -53,7 +57,7 @@ verify:
     Copy-Item resources/install-exe.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
 [private]
-@vendor:
+@vendor: check-runtime
     deno cache --vendor src/install.ts
 
 [private]
