@@ -29,6 +29,8 @@ jobs:
     release:
         needs: checks
         runs-on: windows-latest
+        env:
+            CI_SHELL: pwsh
         strategy:
             fail-fast: false
             matrix:
