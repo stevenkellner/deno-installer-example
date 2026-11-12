@@ -51,7 +51,7 @@ jobs:
 
             - name: Build release
               shell: pwsh
-              run: just --shell pwsh --shell-arg=-NoLogo --shell-arg=-Command release --skip-verify ${{ matrix.format }} ${{ matrix.platform }}
+              run: just --shell pwsh --shell-arg=-NoLogo --shell-arg=-Command release ${{ matrix.format }} ${{ matrix.platform }} --skip-verify
 
             - name: Upload install folder
               uses: actions/upload-artifact@v4
