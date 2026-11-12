@@ -101,4 +101,4 @@ verify:
 [arg('platform', pattern='windows|linux')]
 [arg('skip_verify', long='skip-verify', value='true')]
 @release format platform skip_verify='false':
-    just release-{{ format }} {{ platform }} skip_verify='{{ skip_verify }}'
+    just release-{{ format }} {{ platform }} {{ skip_verify }}

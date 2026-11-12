@@ -29,8 +29,6 @@ jobs:
     release:
         needs: checks
         runs-on: windows-2022
-        env:
-            JUST_SHELL: pwsh
         strategy:
             fail-fast: false
             matrix:
