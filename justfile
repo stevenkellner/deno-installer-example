@@ -47,7 +47,7 @@ verify:
 
 [private]
 @hash-exe: compile
-    (Get-FileHash install/installer.exe -Algorithm SHA256).Hash | Out-File install/installer.exe.sha256 -Encoding ASCII
+    Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop; (Get-FileHash install/installer.exe -Algorithm SHA256).Hash | Out-File install/installer.exe.sha256 -Encoding ASCII
 
 [private]
 [arg('platform', pattern='windows|linux')]
@@ -86,7 +86,7 @@ verify:
 
 [private]
 @hash-zip: zip
-    (Get-FileHash install/install-src.zip -Algorithm SHA256).Hash | Out-File install/install-src.zip.sha256 -Encoding ASCII
+    Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop; (Get-FileHash install/install-src.zip -Algorithm SHA256).Hash | Out-File install/install-src.zip.sha256 -Encoding ASCII
 
 [private]
 [arg('platform', pattern='windows|linux')]
