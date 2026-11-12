@@ -29,6 +29,8 @@ jobs:
     release:
         needs: checks
         runs-on: windows-2022
+        env:
+            JUST_SHELL: pwsh
         strategy:
             fail-fast: false
             matrix:
@@ -48,13 +50,13 @@ jobs:
               run: npm install --global deno@2.5.0 rust-just
 
             - name: Verify PowerShell hash support
-              shell: powershell
+              shell: pwsh
               run: |
                   Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
                   Get-Command Get-FileHash -ErrorAction Stop
 
             - name: Build release
-              run: just release --skip-verify ${{ matrix.format }} ${{ matrix.platform }}
+              run: just release ${{ matrix.format }} ${{ matrix.platform }} --skip-verify
 
             - name: Upload install folder
               uses: actions/upload-artifact@v4

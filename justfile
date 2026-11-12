@@ -9,7 +9,7 @@ DENO_RUNTIME_VERSION := "2.5.0"
 
 [private]
 @check-runtime:
-    $versionOutput = @(deno --version); if (-not $?) { exit 1 }; $runtimeVersion = ($versionOutput[0] -split '\s+')[1]; if ($runtimeVersion -ne '{{DENO_RUNTIME_VERSION}}') { Write-Warning "Local Deno $runtimeVersion does not match portable Deno {{DENO_RUNTIME_VERSION}}. To align versions, run: deno upgrade --version {{DENO_RUNTIME_VERSION}}" }
+    $versionOutput = @(deno --version); if (-not $?) { exit 1 }; $runtimeVersion = ($versionOutput[0] -split '\s+')[1]; if ($runtimeVersion -ne '{{ DENO_RUNTIME_VERSION }}') { Write-Warning "Local Deno $runtimeVersion does not match portable Deno {{ DENO_RUNTIME_VERSION }}. To align versions, run: deno upgrade --version {{ DENO_RUNTIME_VERSION }}" }
 
 @fmt: check-runtime
     deno fmt
@@ -49,11 +49,11 @@ verify:
 @hash-exe: compile
     Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop; (Get-FileHash install/installer.exe -Algorithm SHA256).Hash | Out-File install/installer.exe.sha256 -Encoding ASCII
 
-[private]
 [arg('platform', pattern='windows|linux')]
 [arg('skip_verify', pattern='true|false')]
+[private]
 @release-exe platform skip_verify='false':
-    if ('{{skip_verify}}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
+    if ('{{ skip_verify }}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
     just hash-exe
     Copy-Item resources/install-exe.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
@@ -63,9 +63,9 @@ verify:
 
 [private]
 @download-runtime:
-    echo "Downloading Deno runtime version {{DENO_RUNTIME_VERSION}}..."
+    echo "Downloading Deno runtime version {{ DENO_RUNTIME_VERSION }}..."
     New-Item -ItemType Directory downloads -Force | Out-Null
-    Invoke-WebRequest -Uri "https://github.com/denoland/deno/releases/download/v{{DENO_RUNTIME_VERSION}}/deno-x86_64-pc-windows-msvc.zip" -OutFile downloads/deno.zip
+    Invoke-WebRequest -Uri "https://github.com/denoland/deno/releases/download/v{{ DENO_RUNTIME_VERSION }}/deno-x86_64-pc-windows-msvc.zip" -OutFile downloads/deno.zip
 
 [private]
 @extract-runtime: download-runtime
@@ -89,16 +89,16 @@ verify:
 @hash-zip: zip
     Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop; (Get-FileHash install/install-src.zip -Algorithm SHA256).Hash | Out-File install/install-src.zip.sha256 -Encoding ASCII
 
-[private]
 [arg('platform', pattern='windows|linux')]
 [arg('skip_verify', pattern='true|false')]
+[private]
 @release-zip platform skip_verify='false':
-    if ('{{skip_verify}}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
+    if ('{{ skip_verify }}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
     just hash-zip
     Copy-Item resources/install-zip.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
-[arg('skip_verify', long='skip-verify', value='true')]
 [arg('format', pattern='zip|exe')]
 [arg('platform', pattern='windows|linux')]
+[arg('skip_verify', long='skip-verify', value='true')]
 @release format platform skip_verify='false':
-    just release-{{format}} {{platform}} {{skip_verify}}
+    just release-{{ format }} {{ platform }} skip_verify='{{ skip_verify }}'
