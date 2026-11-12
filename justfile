@@ -51,8 +51,9 @@ verify:
 
 [private]
 [arg('platform', pattern='windows|linux')]
-@release-exe platform:
-    just verify
+[arg('skip_verify', pattern='true|false')]
+@release-exe platform skip_verify='false':
+    if ('{{skip_verify}}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
     just hash-exe
     Copy-Item resources/install-exe.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
@@ -90,12 +91,14 @@ verify:
 
 [private]
 [arg('platform', pattern='windows|linux')]
-@release-zip platform:
-    just verify
+[arg('skip_verify', pattern='true|false')]
+@release-zip platform skip_verify='false':
+    if ('{{skip_verify}}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
     just hash-zip
     Copy-Item resources/install-zip.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
+[arg('skip_verify', long='skip-verify', value='true')]
 [arg('format', pattern='zip|exe')]
 [arg('platform', pattern='windows|linux')]
-@release format platform:
-    just release-{{format}} {{platform}}
+@release format platform skip_verify='false':
+    just release-{{format}} {{platform}} {{skip_verify}}

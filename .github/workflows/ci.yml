@@ -28,7 +28,7 @@ jobs:
 
     release:
         needs: checks
-        runs-on: windows-latest
+        runs-on: windows-2022
         strategy:
             fail-fast: false
             matrix:
@@ -54,7 +54,7 @@ jobs:
                   Get-Command Get-FileHash -ErrorAction Stop
 
             - name: Build release
-              run: just release ${{ matrix.format }} ${{ matrix.platform }}
+              run: just release --skip-verify ${{ matrix.format }} ${{ matrix.platform }}
 
             - name: Upload install folder
               uses: actions/upload-artifact@v4
