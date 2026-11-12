@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "denoland.vscode-deno",
+        "nefrob.vscode-just-syntax",
+        "editorconfig.editorconfig"
+    ]
+}

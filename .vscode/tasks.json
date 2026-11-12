@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "just fmt",
+            "type": "process",
+            "command": "just",
+            "args": ["fmt"],
+            "problemMatcher": []
+        },
+        {
+            "label": "just lint",
+            "type": "process",
+            "command": "just",
+            "args": ["lint"],
+            "problemMatcher": []
+        },
+        {
+            "label": "just check",
+            "type": "process",
+            "command": "just",
+            "args": ["check"],
+            "problemMatcher": []
+        },
+        {
+            "label": "just test",
+            "type": "process",
+            "command": "just",
+            "args": ["test"],
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "just verify",
+            "type": "process",
+            "command": "just",
+            "args": ["verify"],
+            "group": "build",
+            "problemMatcher": []
+        }
+    ]
+}
