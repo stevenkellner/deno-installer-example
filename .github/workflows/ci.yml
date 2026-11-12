@@ -28,9 +28,7 @@ jobs:
 
     release:
         needs: checks
-        runs-on: windows-2022
-        env:
-            CI_SHELL: pwsh
+        runs-on: windows-latest
         strategy:
             fail-fast: false
             matrix:
@@ -48,12 +46,6 @@ jobs:
 
             - name: Install Deno and just
               run: npm install --global deno@2.5.0 rust-just
-
-            - name: Verify PowerShell hash support
-              shell: pwsh
-              run: |
-                  Import-Module Microsoft.PowerShell.Utility -ErrorAction Stop
-                  Get-Command Get-FileHash -ErrorAction Stop
 
             - name: Build release
               shell: pwsh
