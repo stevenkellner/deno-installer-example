@@ -1,11 +1,14 @@
 {
-  "imports": {
-    "@std/assert": "jsr:@std/assert@^1.0.0"
-  },
-  "tasks": {
-    "fmt": "deno fmt",
-    "lint": "deno lint",
-    "check": "deno check src tests",
-    "test": "deno test"
-  }
+    "imports": {
+        "@std/assert": "jsr:@std/assert@^1.0.0"
+    },
+    "tasks": {
+        "fmt": "deno fmt",
+        "lint": "deno lint",
+        "check": "deno check src tests",
+        "test": "deno test"
+    },
+    "fmt": {
+        "indentWidth": 4
+    }
 }

@@ -1,0 +1,7 @@
+/dist/
+/downloads/
+/install/
+/vendor/
+/node_modules/
+/dist.zip
+/dist.zip.sha256

@@ -3,23 +3,25 @@ set shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 DENO_RUNTIME_VERSION := "2.5.0"
 
-default:
-    @just --list
+[private]
+@default:
+    just --list
 
-fmt:
-    @deno fmt
+@fmt:
+    deno fmt
 
-lint:
-    @deno lint
+@lint:
+    deno lint
 
-check:
-    @deno check src tests
+@check:
+    deno check src tests
 
-test:
-    @deno test
+@test:
+    deno test
 
-lock:
-    @deno cache --lock=deno.lock --lock-write src/install.ts
+[private]
+@lock:
+    deno cache --lock=deno.lock src/install.ts
 
 verify:
     just fmt
@@ -28,50 +30,68 @@ verify:
     just test
     just lock
 
-clean:
+@clean:
+    echo "Cleaning up build artifacts..."
     if (Test-Path dist) { Remove-Item dist -Recurse -Force }
     if (Test-Path downloads) { Remove-Item downloads -Recurse -Force }
-    if (Test-Path dist.zip) { Remove-Item dist.zip -Force }
+    if (Test-Path install) { Remove-Item install -Recurse -Force }
 
-vendor:
-    @deno vendor src/install.ts
+[private]
+@compile: clean
+    New-Item -ItemType Directory install -Force | Out-Null
+    deno compile --allow-all --output install/installer.exe src/install.ts
 
-download-runtime:
+[private]
+@hash-exe: compile
+    (Get-FileHash install/installer.exe -Algorithm SHA256).Hash | Out-File install/installer.exe.sha256 -Encoding ASCII
+
+[private]
+[arg('platform', pattern='windows|linux')]
+@release-exe platform:
+    just verify
+    just hash-exe
+    Copy-Item resources/install-exe.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
+
+[private]
+@vendor:
+    deno cache --vendor src/install.ts
+
+[private]
+@download-runtime:
+    echo "Downloading Deno runtime version {{DENO_RUNTIME_VERSION}}..."
     New-Item -ItemType Directory downloads -Force | Out-Null
     Invoke-WebRequest -Uri "https://github.com/denoland/deno/releases/download/v{{DENO_RUNTIME_VERSION}}/deno-x86_64-pc-windows-msvc.zip" -OutFile downloads/deno.zip
 
-extract-runtime: download-runtime
-    Expand-Archive downloads/deno.zip downloads/runtime -Force
+[private]
+@extract-runtime: download-runtime
+    echo "Extracting Deno runtime..."
+    Expand-Archive downloads/deno.zip downloads -Force
 
-compile:
+[private]
+@portable: clean vendor extract-runtime
     New-Item -ItemType Directory dist -Force | Out-Null
-    @deno compile --allow-all --output dist/install.exe src/install.ts
-
-hash-exe: compile
-    $hash = (Get-FileHash dist/install.exe -Algorithm SHA256).Hash
-    Set-Content dist/install.exe.sha256 $hash
-
-release-exe:
-    just verify
-    just hash-exe
-
-portable: vendor extract-runtime
-    New-Item -ItemType Directory dist -Force | Out-Null
-    Copy-Item downloads/runtime/deno.exe dist/
-    $hash = (Get-FileHash dist/deno.exe -Algorithm SHA256).Hash; Set-Content dist/deno.sha256 $hash
+    Copy-Item downloads/deno.exe dist/
     Copy-Item src dist/src -Recurse
-    Copy-Item vendor dist/vendor -Recurse
+    if (Test-Path vendor) { Copy-Item vendor dist/vendor -Recurse }
     Copy-Item deno.lock dist/
-    Copy-Item resources/install.ps1 dist/
-    Copy-Item resources/install.sh dist/
 
-zip: portable
-    Compress-Archive dist/* dist.zip
+[private]
+@zip: portable
+    New-Item -ItemType Directory install -Force | Out-Null
+    Compress-Archive dist/* install/install-src.zip
 
-hash-zip: zip
-    $hash = (Get-FileHash dist.zip -Algorithm SHA256).Hash
-    Set-Content dist.zip.sha256 $hash
+[private]
+@hash-zip: zip
+    (Get-FileHash install/install-src.zip -Algorithm SHA256).Hash | Out-File install/install-src.zip.sha256 -Encoding ASCII
 
-release-zip:
+[private]
+[arg('platform', pattern='windows|linux')]
+@release-zip platform:
     just verify
     just hash-zip
+    Copy-Item resources/install-zip.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
+
+[arg('format', pattern='zip|exe')]
+[arg('platform', pattern='windows|linux')]
+@release format platform:
+    just release-{{format}} {{platform}}
