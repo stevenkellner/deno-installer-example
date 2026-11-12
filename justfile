@@ -1,6 +1,9 @@
 
 set shell := ["powershell.exe", "-NoLogo", "-Command"]
 
+CI_SHELL := env_var_or_default("CI_SHELL", "powershell.exe")
+JUST_RUNNER := if CI_SHELL == "pwsh" { "just --shell pwsh --shell-arg=-NoLogo --shell-arg=-Command" } else { "just" }
+
 DENO_RUNTIME_VERSION := "2.5.0"
 
 [private]
@@ -28,11 +31,11 @@ DENO_RUNTIME_VERSION := "2.5.0"
     deno cache --lock=deno.lock src/install.ts
 
 verify:
-    just fmt
-    just lint
-    just check
-    just test
-    just lock
+    {{ JUST_RUNNER }} fmt
+    {{ JUST_RUNNER }} lint
+    {{ JUST_RUNNER }} check
+    {{ JUST_RUNNER }} test
+    {{ JUST_RUNNER }} lock
 
 @clean:
     echo "Cleaning up build artifacts..."
@@ -53,8 +56,8 @@ verify:
 [arg('skip_verify', pattern='true|false')]
 [private]
 @release-exe platform skip_verify='false':
-    if ('{{ skip_verify }}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
-    just hash-exe
+    if ('{{ skip_verify }}' -ne 'true') { {{ JUST_RUNNER }} verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
+    {{ JUST_RUNNER }} hash-exe
     Copy-Item resources/install-exe.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
 [private]
@@ -93,12 +96,12 @@ verify:
 [arg('skip_verify', pattern='true|false')]
 [private]
 @release-zip platform skip_verify='false':
-    if ('{{ skip_verify }}' -ne 'true') { just verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
-    just hash-zip
+    if ('{{ skip_verify }}' -ne 'true') { {{ JUST_RUNNER }} verify; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
+    {{ JUST_RUNNER }} hash-zip
     Copy-Item resources/install-zip.{{ if platform == "windows" { "ps1" } else { "sh" } }} install/install.{{ if platform == "windows" { "ps1" } else { "sh" } }}
 
 [arg('format', pattern='zip|exe')]
 [arg('platform', pattern='windows|linux')]
 [arg('skip_verify', long='skip-verify', value='true')]
 @release format platform skip_verify='false':
-    just release-{{ format }} {{ platform }} {{ skip_verify }}
+    {{ JUST_RUNNER }} release-{{ format }} {{ platform }} {{ skip_verify }}

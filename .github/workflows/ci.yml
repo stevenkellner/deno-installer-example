@@ -29,6 +29,8 @@ jobs:
     release:
         needs: checks
         runs-on: windows-2022
+        env:
+            CI_SHELL: pwsh
         strategy:
             fail-fast: false
             matrix:
@@ -54,7 +56,8 @@ jobs:
                   Get-Command Get-FileHash -ErrorAction Stop
 
             - name: Build release
-              run: just release ${{ matrix.format }} ${{ matrix.platform }} --skip-verify
+              shell: pwsh
+              run: just --shell pwsh --shell-arg=-NoLogo --shell-arg=-Command release --skip-verify ${{ matrix.format }} ${{ matrix.platform }}
 
             - name: Upload install folder
               uses: actions/upload-artifact@v4
